@@ -1,40 +1,734 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
 
-		<title>reveal.js</title>
+    <title>share</title>
 
-		<link rel="stylesheet" href="dist/reset.css">
-		<link rel="stylesheet" href="dist/reveal.css">
-		<link rel="stylesheet" href="dist/theme/black.css">
+    <link rel="stylesheet" href="dist/reset.css" />
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" />
 
-		<!-- Theme used for syntax highlighted code -->
-		<link rel="stylesheet" href="plugin/highlight/monokai.css">
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
-		</div>
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+    <link rel="stylesheet" href="dist/styles.css" />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h3>从零搭建React简易开发环境</h3>
+        </section>
+        <section>
+          <div class="title">从零搭建React开发环境有以下几个主要理由</div>
+          <ol>
+            <li>
+              定制性：可以完全自定义项目的结构、配置和工作流程，以满足特定的需求。可以选择适合您团队和项目的工具和库，并根据自己的喜好进行定制。
+            </li>
+            <li>
+              学习和理解：将更好地理解React的内部工作原理和各种概念。逐步了解如何配置Babel、Webpack等构建工具，以及如何设置React、React路由等库的基本结构。目的工具和库，并根据自己的喜好进行定制。
+            </li>
+            <li>
+              扩展性和灵活性：在从零开始的项目中，可以灵活地添加或删除特定功能、库或工具，以满足项目需求的变化。可以直接决定使用哪些状态管理库、UI组件库、API调用工具等，而不受预设的框架或脚手架的限制。
+            </li>
+            <li>
+              更好的控制：通过自己搭建React项目，可以更好地控制整个开发流程和代码质量。可以设置自己的代码规范、测试策略和部署策略，以确保最佳的工程实践和最终产品的质量。
+            </li>
+          </ol>
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+				  ![hello](/images/state.png)
+				</textarea
+          >
+        </section>
+        <section>
+          <section data-markdown>
+            <textarea data-template>
+				本次分享基于webpack5+React18+TypeScript搭建
+	
+				```bash
+				mkdir react-webpack-demo && cd react-webpack-demo 
+				npm init -y
+				# 安装webpack
+				npm i webpack webpack-cli -D 
+				# 安装typescript
+				npm i typescript -S
+				# 安装React相关依赖
+				npm i react react-dom -S
+				# 创建webpack配置文件
+				mkdir config && cd config
+				touch webpack.config.base.js
+				touch webpack.config.dev.js
+				touch webpack.config.prod.js
+				cd ..
+				# 创建tsconfig.json
+				npx tsc --init
+				touch postcss.config.js
+				mkdir src && cd src
+				touch index.tsx
+				touch App.tsx 
+				touch index.module.less
+				cd ..
+				mkdir public && cd public
+				touch index.html
+				cd ..
+				# 创建全局类型定义文件夹
+				mkdir types && cd types
+				touch styles.d.ts
+				cd ..
+				```
+				</textarea
+            >
+          </section>
+          <section data-markdown>
+            <textarea data-template>
+			根据上述命令创建目录结构如下
 
-		<script src="dist/reveal.js"></script>
-		<script src="plugin/notes/notes.js"></script>
-		<script src="plugin/markdown/markdown.js"></script>
-		<script src="plugin/highlight/highlight.js"></script>
-		<script>
-			// More info about initialization & config:
-			// - https://revealjs.com/initialization/
-			// - https://revealjs.com/config/
-			Reveal.initialize({
-				hash: true,
+			```bash
+			.
+			├── config
+			│   ├── webpack.config.base.js
+			│   ├── webpack.config.dev.js
+			│   └── webpack.config.prod.js
+			├── package-lock.json
+			├── package.json
+			├── postcss.config.js
+			├── public
+			│   └── index.html
+			├── src
+			│   ├── App.tsx
+			│   ├── index.module.less
+			│   └── index.tsx
+			├── tsconfig.json
+			└── types
+				└── styles.d.ts
+			```
+				  </textarea
+            >
+          </section>
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			```javascript
+			// webpack.config.base.js
+			const path = require('path');
+			const resolve = (targetPath) => {
+				return path.resolve(__dirname, '..', targetPath);
+			};
+			
+			module.exports = {
+				entry: resolve('./src/index.tsx'),
+				output: {
+				  path: resolve('./dist'),
+				  clean: true,
+				  publicPath: '/',
+				  filename: '[name].[contenthash:8].js',
+				  chunkFilename: '[name].[contenthash:8].chunk.js',
+				},
+				resolve: {
+					extensions: ['.ts', '.tsx', '.js', '.jsx', '.less', '.css'],
+					alias: {
+					  '@': resolve('./src'),
+					},
+				},
+			}
+			```
+		</textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			配置tsconfig.json
+			  ```json
+			  {
+				"compilerOptions": {
+				"target": "es2016",
+				"jsx": "react-jsx",
+				"module": "commonjs",
+				"moduleResolution": "node",
+				"baseUrl": "./",
+				"paths": {
+					"@/*": ["./src/*"]
+				},
+				"allowImportingTsExtensions": true,
+				"allowJs": true,
+				"sourceMap": true,
+				"noEmit": true,
+				"esModuleInterop": true,
+				"forceConsistentCasingInFileNames": true,
+				"strict": true,
+				"skipLibCheck": true
+				},
+				"include": ["./src/**/*", "./types"],
+				"exclude": ["node_modules", "dist"]
+			  }
+			  ```
+				</textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			```bash
+			# 安装react相关types
+			npm i @types/react @types/react-dom -D
+			```
+			```tsx
+			// App.tsx
+			const App = () => <h1>Hello world</h1>
+			export default App;
+			```
+			```tsx
+			// index.tsx
+			import ReactDOM from "react-dom/client";
+			import App from "./App.tsx";
 
-				// Learn about plugins: https://revealjs.com/plugins/
-				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			const root = ReactDOM.createRoot(
+				document.getElementById("root") as HTMLElement
+			);
+			root.render(<App />);
+			```
+			</textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			安装babel相关插件
+			```bash
+			npm i babel-loader @babel/core @babel/preset-env @babel/preset-react @babel/preset-typescript @babel/plugin-transform-runtime core-js -D
+			```
+			</textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			添加babel-loader解析ts、tsx、js、jsx文件
+			```javascript
+			// webpack.config.base.js
+			module: {
+				rules: [
+				  {
+					test: /\.(js|ts)x?$/,
+					use: {
+					  loader: "babel-loader",
+					  options: {
+						presets: [
+						  [
+							"@babel/preset-env",
+							{
+							  useBuiltIns: "usage",
+							  corejs: "3",
+							},
+						  ],
+						  [
+							"@babel/preset-react",
+							{
+								runtime: "automatic",
+							},
+						  ],
+						  "@babel/preset-typescript",
+						],
+						plugins: ["@babel/plugin-transform-runtime"],
+						cacheDirectory: true,
+					  },
+					},
+					exclude: /node_modules/,
+				  },
+				],
+			},			
+			```
+			</textarea
+          >
+        </section>
+        <section>
+          <section data-markdown>
+            <textarea data-template>
+			添加相关loader及插件解析css、less以及CSS Modules
+			```bash
+			npm i style-loader css-loader postcss-loader less-loader autoprefixer -D
+			```
+			```javascript
+			// webpack.config.dev.js 解析css、less部分配置
+			const path = require("path");
+			const { merge } = require("webpack-merge");
+			const baseConfig = require("./webpack.config.base.js");
+
+			module.exports = merge(baseConfig, {
+				mode: "development",
+				module: {
+					rules: [
+					{
+						test: /\.less$/,
+						use: [
+							"style-loader",
+							{
+								loader: "css-loader",
+								options: {
+									modules: {
+										localIdentName: "[path][name]__[local]--[hash:base64:5]",
+									},
+									importLoaders: 2,
+								},
+							},
+							"postcss-loader",
+							"less-loader",
+						],
+						include: /\.module\.less$/,
+					},
+					{
+						test: /\.less$/,
+						use: [
+							"style-loader",
+							{
+								loader: "css-loader",
+								options: {
+									importLoaders: 2,
+								},
+							},
+							"postcss-loader",
+							"less-loader",
+						],
+						exclude: /\.module\.less$/,
+					},
+					{
+						test: /\.css$/,
+						use: [
+						"style-loader",
+						{
+							loader: "css-loader",
+							options: {
+								modules: {
+									localIdentName: "[path][name]__[local]--[hash:base64:5]",
+								},
+								importLoaders: 1,
+							},
+						},
+						"postcss-loader",
+						],
+						include: /\.module\.css$/,
+					},
+					{
+						test: /\.css$/,
+						use: [
+							"style-loader",
+							{
+								loader: "css-loader",
+								options: {
+									importLoaders: 1,
+								},
+							},
+							"postcss-loader",
+						],
+						exclude: /\.module\.css$/,
+					},
+					],
+				},
 			});
-		</script>
-	</body>
+			```
+			  </textarea
+            >
+          </section>
+          <section data-markdown>
+            <textarea data-template>
+				  配置postcss.config.js
+				  ```javascript
+				  module.exports = {
+					plugins: [require('autoprefixer')],
+				  };
+				  ```
+			  </textarea
+            >
+          </section>
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			```less
+			// index.module.less
+			:global(input) {
+				&::placeholder {
+					color: orange;
+				}
+			}
+				
+			.text {
+				color: skyblue;
+			}
+			```
+
+			  ```typescript
+			  // styles.d.ts
+			  declare module '*.css' {
+				const styles: { readonly [key: string]: string };
+				export default styles;
+			  }
+			  
+			  declare module '*.less' {
+				const styles: { readonly [key: string]: string };
+				export default styles;
+			  }
+			  ```
+				</textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			  ```tsx
+			  // App.tsx
+			  import { ChangeEvent, useState } from "react";
+			  import styles from "./index.module.less";
+			  const App = () => {
+				const [text, setText] = useState<string>("");
+				const updateText = (e: ChangeEvent<HTMLInputElement>) => setText(e.target.value);
+				return (
+					<>
+						<h1 className={styles.text}>Hello world</h1>
+						<input placeholder="请输入" value={text} onChange={updateText} />
+					</>
+				);
+			  };
+			  export default App;
+			  ```
+				</textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			配置webpack.config.dev.js
+			```bash
+			npm i webpack-merge html-webpack-plugin webpack-dev-server -D
+			```
+			```javascript
+			// 其余部分配置项
+			const path = require("path");
+			const { merge } = require("webpack-merge");
+			const baseConfig = require("./webpack.config.base.js");
+			const HtmlWebpackPlugin = require("html-webpack-plugin");
+			
+			const resolve = (targetPath) => {
+			  return path.resolve(__dirname, "..", targetPath);
+			};
+			
+			module.exports = merge(baseConfig, {
+			  mode: "development",
+			  module: {...}
+			  plugins: [
+				new HtmlWebpackPlugin({
+				  filename: "index.html",
+				  template: resolve("./public/index.html"),
+				}),
+			  ],
+			  cache: {
+				type: "filesystem",
+				allowCollectingMemory: true,
+			  },
+			  devServer: {
+				hot: true,
+				open: true,
+				port: 3000,
+				compress: true,
+			  },
+			  devtool: "source-map",
+			});
+			```
+				</textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+				```html
+				<!-- index.html -->
+				<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+```
+				</textarea
+          >
+        </section>
+        <section data-markdown data-auto-animate>
+          <textarea data-template>
+			package.json添加start
+			  ```json
+			  "scripts": {
+				"start": "webpack server --config ./config/webpack.config.dev.js",
+				"test": "echo \"Error: no test specified\" && exit 1"
+			  },			  
+			  ```
+
+			  ![hello](/images/hello.png)
+			</textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			配置生产环境css、less配置
+			```bash
+			npm i css-minimizer-webpack-plugin mini-css-extract-plugin -D
+			```
+			```javascript
+			// webpack.config.prod.js
+			const path = require("path");
+			const { merge } = require("webpack-merge");
+			const baseConfig = require("./webpack.config.base.js");
+			const HtmlWebpackPlugin = require("html-webpack-plugin");
+			const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
+			const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+			const resolve = (targetPath) => {
+			  return path.resolve(__dirname, "..", targetPath);
+			};
+
+			module.exports = merge(baseConfig, {
+				mode: "production",
+				module: {
+				  rules: [
+					{
+					  test: /\.less$/,
+					  use: [
+						MiniCssExtractPlugin.loader,
+						{
+						  loader: "css-loader",
+						  options: {
+							modules: {
+							  localIdentName: "[path][name]__[local]--[hash:base64:5]",
+							},
+							importLoaders: 2,
+						  },
+						},
+						"postcss-loader",
+						"less-loader",
+					  ],
+					  include: /\.module\.less$/,
+					},
+					{
+					  test: /\.less$/,
+					  use: [
+						MiniCssExtractPlugin.loader,
+						{
+						  loader: "css-loader",
+						  options: {
+							importLoaders: 2,
+						  },
+						},
+						"postcss-loader",
+						"less-loader",
+					  ],
+					  exclude: /\.module\.less$/,
+					},
+					{
+					  test: /\.css$/,
+					  use: [
+						MiniCssExtractPlugin.loader,
+						{
+						  loader: "css-loader",
+						  options: {
+							modules: {
+							  localIdentName: "[path][name]__[local]--[hash:base64:5]",
+							},
+							importLoaders: 1,
+						  },
+						},
+						"postcss-loader",
+					  ],
+					  include: /\.module\.css$/,
+					},
+					{
+					  test: /\.css$/,
+					  use: [
+						MiniCssExtractPlugin.loader,
+						{
+						  loader: "css-loader",
+						  options: {
+							importLoaders: 1,
+						  },
+						},
+						"postcss-loader",
+					  ],
+					  exclude: /\.module\.css$/,
+					},
+				  ],
+				},
+			});
+			```
+		  </textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			其余部分配置项
+			```javascript
+			// webpack.config.prod.js
+			module.exports = merge(baseConfig, {
+				mode: "production",
+				module: {...}
+				plugins: [
+					new MiniCssExtractPlugin({ filename: "[name].[contenthash:8].css" }),
+					new HtmlWebpackPlugin({
+					filename: "index.html",
+					template: resolve("./public/index.html"),
+					}),
+				],
+				optimization: {
+					minimize: true,
+					minimizer: [new CssMinimizerPlugin()],
+					usedExports: true,
+				},
+				externals: {
+					react: "React",
+					"react-dom": "ReactDOM",
+				},
+			})
+			```
+		  </textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			添加cdn
+			```html
+			<!-- index.html -->
+			<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- React 18 -->
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"
+    ></script>
+  </body>
+</html>
+			```
+			</textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			package.json添加build
+			```bash
+			"scripts": {
+				"start": "webpack server --config ./config/webpack.config.dev.js",
+				"build": "webpack --config ./config/webpack.config.prod.js",
+				"test": "echo \"Error: no test specified\" && exit 1"
+			}
+			```
+			</textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			添加React Router
+			```bash
+			npm i react-router-dom -S
+			```
+			```tsx
+			// index.tsx
+			import ReactDOM from "react-dom/client";
+			import App from "./App.tsx";
+			import { BrowserRouter } from "react-router-dom";
+
+			const root = ReactDOM.createRoot(
+			document.getElementById("root") as HTMLElement);
+			root.render(
+			<BrowserRouter>
+				<App />
+			</BrowserRouter>
+			);
+			```
+			</textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			添加路由
+			```tsx
+			// App.tsx
+			import { ChangeEvent, useState } from "react";
+			import styles from "./index.module.less";
+			import { RouteObject, useRoutes } from "react-router-dom";
+
+			const ROUTER_CONFIG: RouteObject[] = [
+				{
+					path: "/",
+					element: <h1>Home</h1>,
+				},
+				{
+					path: "/about",
+					element: <h1>About</h1>,
+				},
+				{
+					path: "*",
+					element: <>404 Not Found!</>,
+				},
+			];
+			const App = () => {
+				return useRoutes(ROUTER_CONFIG);
+			};
+			export default App;
+			```
+		</textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			添加historyApiFallback
+			```javascript
+			// webpack.config.dev.js
+			devServer: {
+				hot: true,
+				open: true,
+				port: 3000,
+				compress: true,
+				historyApiFallback: true, 
+			},
+			```
+			</textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+				## Thanks
+			</textarea
+          >
+        </section>
+      </div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script>
+      // More info about initialization & config:
+      // - https://revealjs.com/initialization/
+      // - https://revealjs.com/config/
+      Reveal.initialize({
+        hash: true,
+
+        // Learn about plugins: https://revealjs.com/plugins/
+        plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
+      });
+    </script>
+  </body>
 </html>
