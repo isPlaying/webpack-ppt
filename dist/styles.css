@@ -21,3 +21,17 @@ section ol li {
 .reveal pre {
   font-size: 0.4em;
 }
+
+.reveal table th {
+  font-size: 0.4em;
+}
+.reveal table tbody,
+.reveal table th,
+.reveal table td {
+  border: 1px solid #fff;
+  font-size: 0.8em;
+}
+
+p.result {
+  text-align: left;
+}

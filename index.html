@@ -354,7 +354,7 @@
 				}
 			}
 				
-			.text {
+			.title {
 				color: skyblue;
 			}
 			```
@@ -385,7 +385,7 @@
 				const updateText = (e: ChangeEvent<HTMLInputElement>) => setText(e.target.value);
 				return (
 					<>
-						<h1 className={styles.text}>Hello world</h1>
+						<h1 className={styles.title}>Hello world</h1>
 						<input placeholder="请输入" value={text} onChange={updateText} />
 					</>
 				);
@@ -670,9 +670,14 @@
 
 			const ROUTER_CONFIG: RouteObject[] = [
 				{
-					path: "/",
-					element: <h1>Home</h1>,
-				},
+				path: "/",
+				element: (
+					<>
+						<h1 className={styles.title}>Home</h1>
+						<input placeholder="请输入" />
+					</>
+					),
+			  	},
 				{
 					path: "/about",
 					element: <h1>About</h1>,
@@ -705,6 +710,200 @@
 			```
 			</textarea
           >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+				#### Vite初探
+
+				Vite（法语意为 "快速的"，发音 /vit/，发音同 "veet"）是一种新型前端构建工具，能够显著提升前端开发体验。它主要由两部分组成：
+
+				- 一个开发服务器，它基于原生ES模块提供了丰富的内建功能，如速度快到惊人的 模块热更新（HMR）。
+
+				- 一套构建指令，它使用 Rollup 打包你的代码，并且它是预配置的，可输出用于生产环境的高度优化过的静态资源。
+
+				</textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			vite搭建
+			```bash
+			.
+			├── config
+			│   ├── vite.config.base.js
+			│   ├── vite.config.dev.js
+			│   └── vite.config.prod.js
+			├── index.html
+			├── package-lock.json
+			├── package.json
+			├── src
+			│   ├── App.tsx
+			│   ├── index.module.less
+			│   └── index.tsx
+			├── tsconfig.json
+			├── types
+			│   └── styles.d.ts
+			└── vite.config.ts
+			```
+			</textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			vite.base.config.js
+			```javascript
+			import react from "@vitejs/plugin-react";
+			import autoprefixer from "autoprefixer";
+			import { createHtmlPlugin } from "vite-plugin-html";
+			import path from "path";
+			
+			const viteBaseConfig = {
+				css: {
+					modules: {
+						generateScopedName: "[name]__[local]___[hash:base64:5]",
+					},
+					postcss: {
+						plugins: [autoprefixer()],
+					},
+				},
+				resolve: {
+					extensions: [".ts", ".tsx", ".js", ".jsx", ".less", ".css"],
+					alias: {
+						"@": path.resolve(__dirname, "../src"),
+					},
+				},
+				plugins: [
+					react(),
+					createHtmlPlugin({
+						entry: "src/index.tsx",
+						minify: true,
+					}),
+				],
+			};
+			export default viteBaseConfig;
+			```
+			</textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			vite.config.dev.js
+			```javascript
+			const viteDevConfig = {
+				server: {
+				  port: 3000,
+				  open: true,
+				},
+			};
+			export default viteDevConfig;
+			```
+			  </textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+			vite.config.prod.js
+			```javascript
+			import importToCDN from "vite-plugin-cdn-import";
+
+			const viteProdConfig = {
+			  build: {
+				minify: "terser",
+				terserOptions: {
+				  compress: {
+					drop_console: true,
+					drop_debugger: true,
+				  },
+				},
+				assetsInlineLimit: 8 * 1024,
+			  },
+			  plugins: [
+				importToCDN({
+				  modules: [
+					{
+					  name: "react",
+					  var: "React",
+					  path: "https://unpkg.com/react@18.2.0/umd/react.production.min.js",
+					},
+					{
+					  name: "react-dom",
+					  var: "ReactDOM",
+					  path: "https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js",
+					},
+				  ],
+				}),
+			  ],
+			};
+			
+			export default viteProdConfig;
+			```
+			</textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+vite.config.ts
+```javascript
+import { defineConfig, mergeConfig } from "vite";
+import viteBaseConfig from "./config/vite.config.base";
+import viteDevConfig from "./config/vite.config.dev";
+import viteProdConfig from "./config/vite.config.prod";
+
+export default defineConfig(({ mode }) => {
+  if (mode === "development") {
+    return mergeConfig(viteBaseConfig, viteDevConfig);
+  } else {
+    return mergeConfig(viteBaseConfig, viteProdConfig);
+  }
+});
+```
+			</textarea
+          >
+        </section>
+        <section data-markdown>
+          <textarea data-template>
+index.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+```
+			</textarea
+          >
+        </section>
+        <section>
+          <div class="title">总结</div>
+          <ol>
+            <li>
+              webpack项目冷启动时必须递归打包整个项目的依赖树，而Vite在开发阶段基于浏览器原生
+              ESM 的支持实现了no-bundle，借助
+              Esbuild超快的编译速度来做第三方库构建和 TS/JSX
+              语法编译，从而能够有效提高开发效率。
+            </li>
+            <li>
+              Vite 开箱就内置了一堆功能，包括 css 预处理器、html 预处理器、hash
+              命名、异步加载、分包、压缩、HMR等。这些功能，作者都按行业最佳实践预设好了，通常不需要用户介入做变更。
+            </li>
+            <li>
+              工程化本身的复杂度不会凭空消失，只是 Vite
+              背后的团队在帮我们负重前行，这对 Vite
+              开发团队而言，维护这么多构建规则是一个不小的负担。而站在用户的角度，越容易上手的工具往往意味着越难被定制。
+            </li>
+            <li>
+              如果只是在 Vite
+              预设好的边框里面玩确实很容易，但随着项目复杂度的提高，用户迟早还是会接触到底层的
+              esbuild 或 Rollup。
+            </li>
+          </ol>
         </section>
         <section data-markdown>
           <textarea data-template>
